@@ -1,6 +1,6 @@
 from flask import Flask, request,session
 from twilio.twiml.messaging_response import MessagingResponse
-
+import os
 
 from utils.product_utils import get_products, get_product_details_by_name, add_product, delete_product, edit_product, get_product_id_by_name
 from utils.supplier_utils import get_suppliers, get_supplier_id_by_name, delete_supplier, add_supplier, edit_supplier, get_supplier_details_by_name
@@ -10,7 +10,8 @@ from utils.employee_utils import get_employees, delete_employee , get_employee_d
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'mysecretkeyjuni'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'defaultsecretkey')
+
 
     
 @app.route("/")
