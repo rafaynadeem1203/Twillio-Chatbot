@@ -458,7 +458,7 @@ def sms_reply():
                         reply = "Employee does not exist"
                     else:
                         # Call the API or method to remove the employee using employee_id
-                        result = get_employee_details_by_id(str(employee_Id), user_phone)
+                        result = get_employee_details_by_id(employee_Id["_id"], user_phone)
                         if result == "Employee not found":
                             reply = "Employee not found"
                         elif result=="Employee details not found":
