@@ -5,7 +5,7 @@ from utils.dbConfig import connect
 
 from utils.dbConfig import connect
 def convert_phone_number(phone_number):
-    return "0" + phone_number[12:]
+    return phone_number[12:]
 
 def get_employees(userPhone):
     try:
