@@ -85,7 +85,8 @@ def get_employee_details_by_id(employee_id, userPhone):
         client.close()
 
         if employee_details:
-            print("Employee Details are: ", employee_details)
+            print("type",type(employee_details))
+
             return employee_details
         else:
             print("Employee not found")
