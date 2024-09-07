@@ -468,7 +468,7 @@ def sms_reply():
                         else:
                              # Parse the details received in the result
                             employee_details = result
-                            
+                            print(result)
                             reply =edit_employee(employee_details['_id'],item_name,new_value, user_phone)
            
                     user_session['second_menu'] = None  # Reset the second menu
