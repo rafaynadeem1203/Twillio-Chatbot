@@ -467,9 +467,9 @@ def sms_reply():
                             reply="Employee ID is required"
                         else:
                              # Parse the details received in the result
-                            if isinstance(result,dict):
-                                employee_details = result
-                                reply =edit_employee(employee_details['_id'],item_name,new_value, user_phone)
+                          
+                            employee_details = result
+                            reply =edit_employee(employee_details['_id'],item_name,new_value, user_phone)
            
                     user_session['second_menu'] = None  # Reset the second menu
                    
