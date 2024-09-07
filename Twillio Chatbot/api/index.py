@@ -404,7 +404,7 @@ def sms_reply():
                         reply = "Employee does not exist"
                     else:
                         # Call the API or method to remove the employee using employee_id
-                        result = delete_employee(employee_id["_id"])
+                        result = delete_employee(employee_id["_id"],user_phone)
                         if result == "Employee deleted successfully":
                             reply = f"Employee {employee_name} removed successfully"
                         else:
