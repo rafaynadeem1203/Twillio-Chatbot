@@ -398,7 +398,7 @@ def sms_reply():
             else:
                 if second_menu == 'removeemployee':
                     employee_name = msg  # Assuming the message contains the name of the employee to remove
-                    employee_id = get_employee_details_by_id(employee_name,user_phone)
+                    employee_id = get_employee_details_by_name(employee_name,user_phone)
                     if employee_id=="Employee not found":
                         # Handle cases where employee is not found or error occurred
                         reply = "Employee does not exist"
