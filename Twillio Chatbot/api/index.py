@@ -372,15 +372,40 @@ def sms_reply():
                     resp.message(reply)
                     return str(resp)
                 elif second_menu=="addemployee":
-                    employee_details = msg
-                    name,email,phone,address,position,hireDate,salary,workingHours,status = employee_details.split(",")
-                    reply = add_employee(name,email,phone,address,position,hireDate,salary,workingHours,status, user_phone)
-                    print(reply)
-                    user_session['second_menu'] = None  # Reset the second menu
-                    
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    return str(resp)
+                    try:
+                        # Split employee details from the input message
+                        employee_details = msg.split(",")
+
+                        if len(employee_details) != 9:
+                            raise ValueError("Incorrect number of employee details provided.")
+
+                        name, email, phone, address, position, hireDate, salary, workingHours, status = employee_details
+
+                        # Add employee information
+                        reply = add_employee(name, email, phone, address, position, hireDate, salary, workingHours, status, user_phone)
+
+                        # Reset the second menu and update session
+                        user_session['second_menu'] = None
+                        session[user_phone] = user_session
+
+                        # Send response message
+                        resp.message(reply)
+                        return str(resp)
+
+                    except ValueError as ve:
+                        # Handle ValueError and send the message to the client
+                        error_message = f"ValueError: {ve}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
+                    except Exception as e:
+                        # Handle any other exceptions and send the message to the client
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
                 elif second_menu=="editemployee":
                     employee_Name,item_name,new_value=msg.split(",")
                     employee_Id = get_employee_id_by_name(employee_Name, user_phone)
