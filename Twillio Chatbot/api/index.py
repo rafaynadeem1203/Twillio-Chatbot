@@ -670,15 +670,14 @@ def sms_reply():
                     try:
                         # Split employee details from the input message
                         employee_details = msg.split(",")
-
                         if len(employee_details) != 9:
                             raise ValueError("Incorrect number of employee details provided.")
-                        
-                        valid_statuses = ["Active", "Terminated", "On leave"]
-                        if status not in valid_statuses:
-                            raise ValueError(f"Invalid status value: {status}. Must be one of {', '.join(valid_statuses)}.")
 
                         name, email, phone, address, position, hireDate, salary, workingHours, status = employee_details
+                        valid_statuses = ["Active", "Terminated", "On leave"]
+                        
+                        if status not in valid_statuses:
+                            raise ValueError(f"Invalid status value: {status}. Must be one of {', '.join(valid_statuses)}.")
 
                         # Add employee information
                         reply = add_employee(name, email, phone, address, position, hireDate, salary, workingHours, status, user_phone)
