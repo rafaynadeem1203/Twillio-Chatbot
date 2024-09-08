@@ -299,7 +299,7 @@ def sms_reply():
                 if msg == '1':
                     user_session['second_menu'] = 'addemployee'
                     second_menu = 'addemployee'
-                    reply = "Please provide details of the employee in the format:\nname,email,phone,address,position,hireDate(YYYY-MM-DDTHH:mm:ss.sssZ),salary,workingHours,status"
+                    reply = "Please provide details of the employee in the format:\nname,email,phone,address,position,hireDate(YYYY-MM-DDTHH:mm:ss.sssZ),salary,workingHours,status(Active, On Leave, Terminated)"
 
                 elif msg == '2':
                     user_session['second_menu'] = 'removeemployee'
@@ -317,7 +317,7 @@ def sms_reply():
                     employees = get_employees(user_phone)
                     if employees:
                         # Format product data as a string
-                        employee_list = "\n\n".join([f"Name: {employee['name']}\nEmail: {employee['email']}\nPhone: {employee['phone']}\nAddress: {employee['address']}\nPosition: {employee['position']}\nSalary: {employee['salary']}\nWorking Hours: {employee['workingHours']}\nStatus: {'status'}\nHiredate:{employee['hireDate']}" for employee in employees])
+                        employee_list = "\n\n".join([f"Name: {employee['name']}\nEmail: {employee['email']}\nPhone: {employee['phone']}" for employee in employees])
                         resp.message(f"Employees are:\n{employee_list}")
                     else:
                         resp.message("Failed to fetch employees list")
@@ -364,7 +364,7 @@ def sms_reply():
                         # Handle cases where Employee is not found or error occurred
                         reply = "Employee does not exist"
                     else:
-                        reply = f"Employee Details:\nName: {employee_details['name']}\nAddress: {employee_details['address']}\nEmail: {employee_details['email']}"
+                        reply = f"Employee Details:\nName: {employee_details['name']}\nAddress: {employee_details['address']}\nEmail: {employee_details['email']}\nAddress: {employee_details['address']}\nPosition: {employee_details['position']}\nSalary: {employee_details['salary']}\nWorking Hours: {employee_details['workingHours']}\nStatus: {employee_details['status']}\nHiredate:{employee_details['hireDate']}"
            
                     user_session['second_menu'] = None  # Reset the second menu
                     
