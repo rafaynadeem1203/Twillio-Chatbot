@@ -129,6 +129,7 @@ def add_supplier(name, contactPerson, email, phone, address, userPhone):
 
 def edit_supplier(id, item_name, new_value, userPhone):
     try:
+        connect()
         transformedPhone = convert_phone_number(userPhone)
         client = connect()
 
