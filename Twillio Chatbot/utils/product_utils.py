@@ -46,7 +46,7 @@ def get_product_details_by_name(product_name,userPhone):
             return productDetails
         else:
             print("Product not found")
-            return "Product not found"#, 404
+            return None
 
     except Exception as e:
         print("Error fetching product details:", str(e))
@@ -68,7 +68,7 @@ def get_product_id_by_name(product_name, userPhone):
             return product_details['_id']
         else:
             print("Product not Found")
-            return "Product not found"
+            return False
     except Exception as e:
         print("Error fetching Product details:", str(e))
         return "Internal Server Error", 500

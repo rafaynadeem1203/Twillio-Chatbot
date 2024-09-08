@@ -42,7 +42,7 @@ def get_employee_id_by_name(employee_name,userPhone):
             return employeeDetails['_id']
         else:
             print("Employee not found")
-            return "Employee not found"#, 404
+            return None
 
     except Exception as e:
         print("Error fetching Employee details:", str(e))
@@ -61,9 +61,9 @@ def delete_employee(employee_id, userPhone):
         client.close()
 
         if result.deleted_count > 0:
-            return "Employee deleted successfully"
+            return True
         else:
-            return "Employee not found"
+            return False
 
     except Exception as e:
         print("Error deleting employee:", str(e))
@@ -165,16 +165,13 @@ def get_employee_details_by_name(employee_name, userPhone):
         user_collection = db.employees  # Adjust collection name based on your database schema
         
         employee_details = user_collection.find_one({"name": employee_name})
-        employee_details["_id"]=str(employee_details["_id"])
         client.close()
 
         if employee_details:
-            print(type(employee_details))
-
             return employee_details
         else:
             print("Employee not found")
-            return "Employee not found"  # Or any specific message for employee not found
+            return None  # Or any specific message for employee not found
 
     except Exception as e:
         print("Error fetching employee details:", str(e))
