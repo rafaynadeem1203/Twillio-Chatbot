@@ -320,13 +320,13 @@ def sms_reply():
                     return str(resp)
                 elif second_menu=="editsupplier":
                     supplier_Name,item_name,new_value=msg.split(",")
-                    supplier_Id = get_supplier_details_by_name(supplier_Name, user_phone)
+                    supplier_Id = get_supplier_id_by_name(supplier_Name, user_phone)
                     if supplier_Id=="Supplier not found":
                         # Handle cases where supplier is not found or error occurred
                         reply = "Supplier does not exist"
                     else:
                         # Call the API or method to remove the supplier using supplier_id
-                        result = get_supplier_details_by_name(supplier_Name["_id"], user_phone)
+                        result = get_supplier_details_by_name(supplier_Id, user_phone)
                         if result == "Supplier not found":
                             reply = "Supplier not found"
                         elif result=="Supplier details not found":
