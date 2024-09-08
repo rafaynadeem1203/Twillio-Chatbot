@@ -284,7 +284,7 @@ def sms_reply():
                     return str(resp)  
                 elif second_menu == 'viewsupplier':
                     supplier_name = msg  # Assuming the message contains the name of the supplier to remove
-                    result = get_supplier_details_by_name(supplier_name, user_phone)
+                    result = get_supplier_details_by_name(get_supplier_id_by_name(supplier_name), user_phone)
                     if result=="Supplier not found":
                         # Handle cases where supplier is not found or error occurred
                         reply = "Supplier does not exist"
