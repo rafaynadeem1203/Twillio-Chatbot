@@ -3,7 +3,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 import os
 
 from utils.product_utils import get_products, get_product_details_by_name, add_product, delete_product, edit_product, get_product_id_by_name
-from utils.supplier_utils import get_suppliers, get_supplier_id_by_name, delete_supplier, add_supplier, edit_supplier, get_supplier_details_by_name, get_supplier_name_by_id
+from utils.supplier_utils import get_suppliers, get_supplier_id_by_name, delete_supplier, add_supplier, edit_supplier, get_supplier_details_by_id, get_supplier_name_by_id
 from utils.employee_utils import get_employees, delete_employee , get_employee_details_by_id, add_employee, edit_employee, get_employee_details_by_name
 
 
@@ -277,7 +277,7 @@ def sms_reply():
                     return str(resp)  
                 elif second_menu == 'viewsupplier':
                     supplier_name = msg  # Assuming the message contains the name of the supplier to remove
-                    result = get_supplier_details_by_name(get_supplier_id_by_name(supplier_name,user_phone), user_phone)
+                    result = get_supplier_details_by_id(get_supplier_id_by_name(supplier_name,user_phone), user_phone)
                     if result=="Supplier not found":
                         # Handle cases where supplier is not found or error occurred
                         reply = "Supplier does not exist"
@@ -319,7 +319,7 @@ def sms_reply():
                         reply = "Supplier does not exist"
                     else:
                         # Call the API or method to remove the supplier using supplier_id
-                        result = get_supplier_details_by_name(supplier_Id, user_phone)
+                        result = get_supplier_details_by_id(supplier_Id, user_phone)
                         if result == "Supplier not found":
                             reply = "Supplier not found"
                         elif result=="Supplier details not found":
