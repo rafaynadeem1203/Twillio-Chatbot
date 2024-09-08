@@ -100,7 +100,7 @@ def sms_reply():
                     products = get_products(user_phone)
                     if products:
                         # Format product data as a string
-                        product_list = "\n\n".join([f"Name: {product['name']}\nDescription: {product['description']}\nPrice: {product['price']}" for product in products])
+                        product_list = "\n\n".join([f"Name: {product['name']}\nBrand: {product['brand']}\nDescription: {product['description']}\nQuantity: {product['quantity']}\nSupplier: {product['supplier']}\nPrice: {product['price']}" for product in products])
                         resp.message(f"Products:\n{product_list}")
                     else:
                         resp.message("Failed to fetch product data")
@@ -174,12 +174,16 @@ def sms_reply():
                     name, description, price, quantity, unitOfMeasure, category, brand, sku, supplierName = product_details.split(",")
                     supplier=get_supplier_id_by_name(str(supplierName),user_phone)
                     if supplier!="Supplier not found":
-                        reply = add_product(name, price, category, quantity, sku, brand, unitOfMeasure, supplier, description, user_phone)
-                        print(reply)
+                        reply = add_product(name, price, category, quantity, sku, brand, unitOfMeasure, supplierName, description, user_phone)
+                        if reply=="Internal Server Error":
+                            reply="Something went wrong. Please try again."
+                            user_session['second_menu'] = None  # Reset the second menu
+                            session[user_phone] = user_session
+                            resp.message(reply)
+                            return str(resp)
                     else:
                         reply="Supplier does not exists."
                     user_session['second_menu'] = None  # Reset the second menu
-                    
                     session[user_phone] = user_session
                     resp.message(reply)
                     return str(resp)
