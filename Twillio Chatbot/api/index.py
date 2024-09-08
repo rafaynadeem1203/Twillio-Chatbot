@@ -178,6 +178,9 @@ def sms_reply():
                     except Exception as e:
                         # Handle any unexpected errors
                         error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
 
                 elif second_menu == 'viewproduct':
                     try:
