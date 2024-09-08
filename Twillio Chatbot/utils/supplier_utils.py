@@ -165,7 +165,7 @@ def get_supplier_name_by_id(supplier_id, userPhone):
 
         if result:
             print("Supplier Details are: ", result)
-            return result
+            return result['name']
         else:
             print("Supplier not Found")
             return "Supplier not found"
