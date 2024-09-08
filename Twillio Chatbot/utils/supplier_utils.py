@@ -161,11 +161,12 @@ def get_supplier_name_by_id(supplier_id, userPhone):
         user_collection = db.suppliers  # Assuming a 'suppliers' collection
         
         result = user_collection.find_one({"_id": supplier_id})
+        name=result['name']
         client.close()
 
         if result:
             print("Supplier Details are: ", result)
-            return result['name']
+            return name
         else:
             print("Supplier not Found")
             return "Supplier not found"
