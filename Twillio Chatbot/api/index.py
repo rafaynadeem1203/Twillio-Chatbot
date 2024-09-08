@@ -3,7 +3,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 import os
 
 from utils.product_utils import get_products, get_product_details_by_name, add_product, delete_product, edit_product, get_product_id_by_name
-from utils.supplier_utils import get_suppliers, get_supplier_id_by_name, delete_supplier, add_supplier, edit_supplier, get_supplier_details_by_name
+from utils.supplier_utils import get_suppliers, get_supplier_id_by_name, delete_supplier, add_supplier, edit_supplier, get_supplier_details_by_name, get_supplier_name_by_id
 from utils.employee_utils import get_employees, delete_employee , get_employee_details_by_id, add_employee, edit_employee, get_employee_details_by_name
 
 
@@ -162,7 +162,7 @@ def sms_reply():
                             product_details = result
 
                              # Format the product details into a reply message
-                            reply = f"Product Details:\nName: {product_details['name']}\nDescription: {product_details['description']}\nPrice: {product_details['price']}"
+                            reply = f"Product Details:\nName: {product_details['name']}\nBrand: {product_details['brand']}\nDescription: {product_details['description']}\nQuantity: {product_details['quantity']}\nSupplier Name: {get_supplier_name_by_id(product_details['supplier'],user_phone)}\nPrice: {product_details['price']}"
            
                     user_session['second_menu'] = None  # Reset the second menu
                     
