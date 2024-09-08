@@ -173,8 +173,7 @@ def sms_reply():
                     product_details = msg
                     name, description, price, quantity, unitOfMeasure, category, brand, sku, supplierName = product_details.split(",")
                     supplier=get_supplier_id_by_name(str(supplierName),user_phone)
-                    if supplier:
-                        print(name, description, price, quantity, unitOfMeasure, category, brand, sku, supplierName)
+                    if supplier!="Supplier not found":
                         reply = add_product(name, price, category, quantity, sku, brand, unitOfMeasure, supplier, description, user_phone)
                         print(reply)
                     else:
