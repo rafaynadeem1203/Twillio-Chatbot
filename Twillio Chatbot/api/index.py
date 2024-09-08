@@ -172,10 +172,13 @@ def sms_reply():
                 elif second_menu == 'addproduct':
                     product_details = msg
                     name, description, price, quantity, unitOfMeasure, category, brand, sku, supplierName = product_details.split(",")
-                    supplier=get_product_details_by_name(str(supplierName),user_phone);
-                    print(name, description, price, quantity, unitOfMeasure, category, brand, sku, supplierName)
-                    reply = add_product(name, price, category, quantity, sku, brand, unitOfMeasure, supplier, description, user_phone)
-                    print(reply)
+                    supplier=get_supplier_id_by_name(str(supplierName),user_phone)
+                    if supplier:
+                        print(name, description, price, quantity, unitOfMeasure, category, brand, sku, supplierName)
+                        reply = add_product(name, price, category, quantity, sku, brand, unitOfMeasure, supplier, description, user_phone)
+                        print(reply)
+                    else:
+                        reply="Supplier does not exists."
                     user_session['second_menu'] = None  # Reset the second menu
                     
                     session[user_phone] = user_session
