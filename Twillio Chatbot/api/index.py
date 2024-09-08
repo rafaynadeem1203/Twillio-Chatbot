@@ -240,7 +240,7 @@ def sms_reply():
                     suppliers = get_suppliers(user_phone)
                     if suppliers:
                         # Format supplier data as a string
-                        supplier_list = "\n\n".join([f"Name: {supplier['name']}\nPhone: {supplier['phone']}\nAddress: {supplier['address']}" for supplier in suppliers])
+                        supplier_list = "\n\n".join([f"Name: {supplier['name']}\nContact Person: {supplier['contactPerson']}\nPhone: {supplier['phone']}\nAddress: {supplier['address']}" for supplier in suppliers])
                         resp.message(f"Suppliers are:\n{supplier_list}")
                     else:
                         resp.message("Failed to fetch suppliers list")
@@ -301,7 +301,7 @@ def sms_reply():
                             supplier_details = result
 
                              # Format the Supplier details into a reply message
-                            reply = f"Supplier Details:\nName: {supplier_details['name']}\n Contact Person: {supplier_details['contactPerson']}\nAddress: {supplier_details['address']}\nEmail: {supplier_details['email']} \n Phone: {supplier_details['phone']}"
+                            reply = f"Supplier Details:\nName: {supplier_details['name']}\nContact Person: {supplier_details['contactPerson']}\nAddress: {supplier_details['address']}\nEmail: {supplier_details['email']} \nPhone: {supplier_details['phone']}"
            
                     user_session['second_menu'] = None  # Reset the second menu
                     
