@@ -38,11 +38,11 @@ def get_product_details_by_name(product_name,userPhone):
         db = client.get_database(transformedPhone)
         user_collection = db.products
         productDetails = user_collection.find_one({"name": product_name})
-        productDetails["_id"]=str(productDetails["_id"])
         client.close()
         
         if productDetails:
             print("product details are: ", productDetails)
+            productDetails["_id"]=str(productDetails["_id"])
             return productDetails
         else:
             print("Product not found")
