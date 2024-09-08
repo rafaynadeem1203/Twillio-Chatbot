@@ -100,7 +100,7 @@ def sms_reply():
                     products = get_products(user_phone)
                     if products:
                         # Format product data as a string
-                        product_list = "\n\n".join([f"Name: {product['name']}\nBrand: {product['brand']}\nDescription: {product['description']}\nQuantity: {product['quantity']}\nSupplier: {product['supplier']}\nPrice: {product['price']}" for product in products])
+                        product_list = "\n\n".join([f"Name: {product['name']}\nBrand: {product['brand']}\nDescription: {product['description']}\nQuantity: {product['quantity']}\nPrice: {product['price']}" for product in products])
                         resp.message(f"Products:\n{product_list}")
                     else:
                         resp.message("Failed to fetch product data")
