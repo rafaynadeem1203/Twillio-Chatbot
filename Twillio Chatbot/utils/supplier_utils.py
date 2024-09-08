@@ -55,7 +55,7 @@ def get_supplier_details_by_name(supplier_name, userPhone):
         db = client.get_database(transformedPhone)
         user_collection = db.suppliers  # Adjust collection name as per your database
         
-        supplier_details = user_collection.find_one({"name": supplier_name})
+        supplier_details = user_collection.find_one({"_id": supplier_name})
         client.close()
 
         if supplier_details:
