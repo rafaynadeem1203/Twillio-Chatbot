@@ -95,19 +95,47 @@ def sms_reply():
                     reply = "Please provide the name of the product you want to see details of"
                     # Handle editing a product    
                 elif msg == '4':
-                    reply = "List of Products:\n"
-                    # Get product data
-                    products = get_products(user_phone)
-                    if products:
-                        # Format product data as a string
-                        product_list = "\n\n".join([f"Name: {product['name']}\nDescription: {product['description']}\nQuantity: {product['quantity']}\nPrice: {product['price']}" for product in products])
-                        resp.message(f"Products:\n{product_list}")
-                    else:
-                        resp.message("Failed to fetch product data")
-                    
-                    return str(resp)
+                    try:
+                        reply = "List of Products:\n"
 
-                    #call the api to get all the products
+                        # Get product data
+                        products = get_products(user_phone)
+
+                        if products:
+                            # Ensure products is a list of dictionaries
+                            if not isinstance(products, list):
+                                raise TypeError("Products data should be a list.")
+
+                            # Format product data as a string
+                            product_list = "\n\n".join(
+                                [f"Name: {product.get('name', 'N/A')}\n"
+                                f"Description: {product.get('description', 'N/A')}\n"
+                                f"Quantity: {product.get('quantity', 'N/A')}\n"
+                                f"Price: {product.get('price', 'N/A')}"
+                                for product in products]
+                            )
+                            resp.message(f"Products:\n{product_list}")
+                        else:
+                            resp.message("Failed to fetch product data")
+
+                        return str(resp)
+
+                    except TypeError as te:
+                        # Handle TypeError for incorrect data type issues
+                        error_message = f"TypeError: {te}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
+                    except Exception as e:
+                        # Handle any unexpected errors
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
+
+
                 elif msg == '6':
                     session.clear()
                     user_session['second_menu'] = None  # Reset the second menu
@@ -116,75 +144,170 @@ def sms_reply():
                     reply = "Returning to the main menu\n1. Information regarding Products\n2. Information regarding Suppliers\n3. Information regarding Employees\n4. General information about the whole system"
                     #delete all the first_menu, secon_menu and first_Time if necessary
                 else:
-                    reply = "Invalid option. Please choose a valid option."
-                
-
-               
+                    reply = "Invalid option. Please choose a valid option."           
 
             else:
                 if second_menu == 'removeproduct':
-                    
-                    product_name = msg  # Assuming the message contains the name of the product to remove
-                    product_id = get_product_id_by_name(product_name,user_phone)
-                    if not product_id:
-                        # Handle cases where product is not found or error occurred
-                        reply = "Product does not exist"
-                    else:
-                        # Call the API or method to remove the product using product_id
-                        result = delete_product(str(product_id),user_phone)
-                        if result == "Product deleted successfully":
-                            reply = f"Product {product_name} removed successfully"
+                    try:
+                        # Assume the message contains the name of the product to remove
+                        product_name = msg
+
+                        # Retrieve the product ID based on the product name
+                        product_id = get_product_id_by_name(product_name, user_phone)
+
+                        if not product_id:
+                            # Handle cases where the product is not found
+                            raise Exception(f"{product_name} does not exits.")
                         else:
-                            reply = f"Failed to remove product: {result}"
-                    user_session['second_menu'] = None  # Reset the second menu
-                    
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    
-                    return str(resp)
+                            # Call the API or method to remove the product using the product_id
+                            result = delete_product(str(product_id), user_phone)
+
+                            if result == "Product deleted successfully":
+                                reply = f"Product {product_name} removed successfully"
+                            else:
+                                reply = f"Failed to remove product: {result}"
+
+                        # Reset the second menu and update the session
+                        user_session['second_menu'] = None
+                        session[user_phone] = user_session
+
+                        # Send the response message
+                        resp.message(reply)
+                        return str(resp)
+                
+                    except Exception as e:
+                        # Handle any unexpected errors
+                        error_message = f"An error occurred: {e}"
+
                 elif second_menu == 'viewproduct':
-                    product_name = msg  # Assuming the message contains the name of the product to remove
-                    product_details = get_product_details_by_name(product_name,user_phone)
-                    if not product_details:
-                        # Handle cases where product is not found or error occurred
-                        reply = "Product does not exist"
-                    else:
-                        # Format the product details into a reply message
-                        reply = f"Product Details:\nName: {product_details['name']}\nBrand: {product_details['brand']}\nDescription: {product_details['description']}\nQuantity: {product_details['quantity']}\nSupplier Name: {get_supplier_name_by_id(product_details['supplier'],user_phone)}\nPrice: {product_details['price']}"
-           
-                    user_session['second_menu'] = None  # Reset the second menu
+                    try:
+                        # Assume the message contains the name of the product to view
+                        product_name = msg
+
+                        # Retrieve product details based on the product name
+                        product_details = get_product_details_by_name(product_name, user_phone)
+
+                        if not product_details:
+                            # Handle cases where the product is not found
+                           raise Exception(f"{product_name} is not a valid product.")
+                        else:
+                            # Retrieve the supplier name using the supplier ID from product details
+                            supplier_name = get_supplier_name_by_id(product_details.get('supplier', ''), user_phone)
+                            if not supplier_name:
+                                supplier_name = "Supplier information not available"
+
+                            # Format the product details into a reply message
+                            reply = (f"Product Details:\n"
+                                    f"Name: {product_details.get('name', 'N/A')}\n"
+                                    f"Brand: {product_details.get('brand', 'N/A')}\n"
+                                    f"Description: {product_details.get('description', 'N/A')}\n"
+                                    f"Quantity: {product_details.get('quantity', 'N/A')}\n"
+                                    f"Supplier Name: {supplier_name}\n"
+                                    f"Price: {product_details.get('price', 'N/A')}")
+
+                        # Reset the second menu and update the session
+                        user_session['second_menu'] = None
+                        session[user_phone] = user_session
+
+                        # Send the response message
+                        resp.message(reply)
+                        return str(resp)
                     
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    return str(resp)
+                   
+                    except Exception as e:
+                        # Handle any unexpected errors
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
                 elif second_menu == 'addproduct':
-                    product_details = msg
-                    name, description, price, quantity, unitOfMeasure, category, brand, sku, supplierName = product_details.split(",")
-                    supplier=get_supplier_id_by_name(str(supplierName),user_phone)
-                    if supplier:
-                        reply = add_product(name, price, category, quantity, sku, brand, unitOfMeasure, supplierName, description, user_phone)
-                    else:
-                        reply="Supplier does not exists."
-                    user_session['second_menu'] = None  # Reset the second menu
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    return str(resp)
+                    try:
+                        # Check if the message contains the correct number of product details
+                        product_details = msg.split(",")
+                        if len(product_details) != 9:
+                            raise ValueError("Incorrect number of product details provided. Expected 9 values.")
+
+                        # Unpack product details
+                        name, description, price, quantity, unitOfMeasure, category, brand, sku, supplierName = product_details
+
+                        # Retrieve supplier ID
+                        supplier = get_supplier_id_by_name(str(supplierName), user_phone)
+
+                        if supplier:
+                            # Call the API or method to add the product
+                            reply = add_product(name, price, category, quantity, sku, brand, unitOfMeasure, supplierName, description, user_phone)
+                        else:
+                            raise ValueError(f"{supplierName} is not a supplier. Please enter correcct supplier")
+
+                        # Reset the second menu and update the session
+                        user_session['second_menu'] = None
+                        session[user_phone] = user_session
+
+                        # Send the response message
+                        resp.message(reply)
+                        return str(resp)
+
+                    except ValueError as ve:
+                        # Handle ValueError for incorrect number of details or other value-related issues
+                        error_message = f"ValueError: {ve}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
+                    except Exception as e:
+                        # Handle any unexpected errors
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
                 elif second_menu=="editproduct":
-                    product_Name,item_name,new_value=msg.split(",")
-                    product_Id = get_product_id_by_name(product_Name,user_phone)
-                    if not product_Id:
-                        # Handle cases where product is not found or error occurred
-                        reply = "Product does not exist"
-                    else:
-                        edit_response = edit_product(product_Id,item_name,new_value, user_phone)
-                        # Format the product details into a reply message
-                        reply = edit_response
-           
-                    user_session['second_menu'] = None  # Reset the second menu
-                    
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    return str(resp)
+                    try:
+                        # Split the input message to get product details
+                        product_Name, item_name, new_value = msg.split(",")
+
+                        # Validate item_name
+                        valid_item_names = ["name", "description", "price", "quantity", "unitOfMeasure", "category", "brand", "sku", "supplierName"]
+                        if item_name not in valid_item_names:
+                            raise ValueError(f"Invalid item_name: {item_name}. Must be one of {', '.join(valid_item_names)}.")
+                        if item_name=="supplierName":
+                            supplier_exists=get_supplier_id_by_name(item_name,user_phone)
+                            if not supplier_exists:
+                                raise ValueError(f"Invalid supplier name. Please enter a name which exists in database")
+                        # Retrieve the product ID based on the product name
+                        product_Id = get_product_id_by_name(product_Name, user_phone)
+
+                        if not product_Id:
+                            # Handle cases where the product is not found
+                            raise ValueError(f"Invalid Product Name. Please enter correct name.")
+                        else:
+                            # Call the API or method to edit the product details
+                            edit_response = edit_product(product_Id, item_name, new_value, user_phone)
+                            reply = edit_response
+
+                        # Reset the second menu and update the session
+                        user_session['second_menu'] = None
+                        session[user_phone] = user_session
+
+                        # Send the response message
+                        resp.message(reply)
+                        return str(resp)
+
+                    except ValueError as ve:
+                        # Handle ValueError for invalid item_name or other value-related issues
+                        error_message = f"ValueError: {ve}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
+                    except Exception as e:
+                        # Handle any unexpected errors
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
           
 
         elif first_menu == 'suppliermenu':
@@ -205,19 +328,46 @@ def sms_reply():
                     reply = "Please provide the name of the supplier followed by item name:value you want to change in the below format\nSupplier Name,item name,new value"
                     # Handle editing a supplier
                 elif msg == '4':
-                    reply = "List of Suppliers:\n"
-                    
-                    # Get supplier data
-                    suppliers = get_suppliers(user_phone)
-                    if suppliers:
-                        # Format supplier data as a string
-                        supplier_list = "\n\n".join([f"Name: {supplier['name']}\nContact Person: {supplier['contactPerson']}\nPhone: {supplier['phone']}\nAddress: {supplier['address']}" for supplier in suppliers])
-                        resp.message(f"Suppliers are:\n{supplier_list}")
-                    else:
-                        resp.message("Failed to fetch suppliers list")
-                    
-                    return str(resp)
-                    #logic for getting the list of suppliers
+                    try:
+                        reply = "List of Suppliers:\n"
+                        
+                        # Get supplier data
+                        suppliers = get_suppliers(user_phone)
+
+                        if suppliers:
+                            # Ensure suppliers is a list of dictionaries
+                            if not isinstance(suppliers, list):
+                                raise TypeError("Suppliers data should be a list.")
+
+                            # Format supplier data as a string
+                            supplier_list = "\n\n".join(
+                                [f"Name: {supplier.get('name', 'N/A')}\n"
+                                f"Contact Person: {supplier.get('contactPerson', 'N/A')}\n"
+                                f"Phone: {supplier.get('phone', 'N/A')}\n"
+                                f"Address: {supplier.get('address', 'N/A')}"
+                                for supplier in suppliers]
+                            )
+                            resp.message(f"Suppliers are:\n{supplier_list}")
+                        else:
+                            resp.message("Failed to fetch suppliers list")
+
+                        return str(resp)
+
+                    except TypeError as te:
+                        # Handle TypeError for incorrect data type issues
+                        error_message = f"TypeError: {te}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
+                    except Exception as e:
+                        # Handle any other unexpected errors
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
+                                        
                 elif msg == '5':
                     user_session['second_menu'] = 'viewsupplier'
                     second_menu = 'viewsupplier'
@@ -236,62 +386,163 @@ def sms_reply():
                 return str(resp)
             else:
                 if second_menu == 'removesupplier':
-                    supplier_name = msg  # Assuming the message contains the name of the supplier to remove
-                    supplier_id = get_supplier_id_by_name(supplier_name, user_phone)
-                    if not supplier_id:
-                        # Handle cases where supplier is not found or error occurred
-                        reply = "Supplier does not exist"
-                    else:
-                        # Call the API or method to remove the supplier using supplier_id
-                        result = delete_supplier(str(supplier_id), user_phone)
-                        if result == "Supplier deleted successfully":
-                            reply = f"Supplier {supplier_name} removed successfully"
+                    try:
+                        # Assume the message contains the name of the supplier to remove
+                        supplier_name = msg
+
+                        # Retrieve the supplier ID based on the supplier name
+                        supplier_id = get_supplier_id_by_name(supplier_name, user_phone)
+
+                        if not supplier_id:
+                            # Handle cases where the supplier is not found
+                            reply = "Supplier does not exist"
                         else:
-                            reply = f"Failed to remove supplier: {result}"
-                    user_session['second_menu'] = None  # Reset the second menu
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    return str(resp)  
+                            # Call the API or method to remove the supplier using the supplier_id
+                            result = delete_supplier(str(supplier_id), user_phone)
+
+                            if result == "Supplier deleted successfully":
+                                reply = f"Supplier {supplier_name} removed successfully"
+                            else:
+                                reply = f"Failed to remove supplier: {result}"
+
+                        # Reset the second menu and update the session
+                        user_session['second_menu'] = None
+                        session[user_phone] = user_session
+
+                        # Send the response message
+                        resp.message(reply)
+                        return str(resp)
+
+                    except Exception as e:
+                        # Handle any unexpected errors
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+ 
                 elif second_menu == 'viewsupplier':
-                    supplier_name = msg  # Assuming the message contains the name of the supplier to remove
-                    result = get_supplier_details_by_id(get_supplier_id_by_name(supplier_name,user_phone), user_phone)
-                    if result=="Supplier Not Found":
-                        # Handle cases where supplier is not found or error occurred
-                        reply = "Supplier does not exist"
-                    else:
-                            # Parse the details received in the result
-                            supplier_details = result
-                             # Format the Supplier details into a reply message
-                            reply = f"Supplier Details:\nName: {supplier_details['name']}\nContact Person: {supplier_details['contactPerson']}\nAddress: {supplier_details['address']}\nEmail: {supplier_details['email']} \nPhone: {supplier_details['phone']}"
-           
-                       
-                    user_session['second_menu'] = None  # Reset the second menu
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    return str(resp)
+                    try:
+                        # Assume the message contains the name of the supplier to retrieve
+                        supplier_name = msg
+
+                        # Retrieve the supplier ID based on the supplier name
+                        supplier_id = get_supplier_id_by_name(supplier_name, user_phone)
+                        if not supplier_id:
+                            raise ValueError("Supplier not found.")
+
+                        # Retrieve supplier details based on the supplier ID
+                        result = get_supplier_details_by_id(supplier_id, user_phone)
+
+                        
+                        # Format the supplier details into a reply message
+                        supplier_details = result
+                        reply = (f"Supplier Details:\n"
+                                f"Name: {supplier_details.get('name', 'N/A')}\n"
+                                f"Contact Person: {supplier_details.get('contactPerson', 'N/A')}\n"
+                                f"Address: {supplier_details.get('address', 'N/A')}\n"
+                                f"Email: {supplier_details.get('email', 'N/A')}\n"
+                                f"Phone: {supplier_details.get('phone', 'N/A')}")
+
+                        # Reset the second menu and update the session
+                        user_session['second_menu'] = None
+                        session[user_phone] = user_session
+
+                        # Send the response message
+                        resp.message(reply)
+                        return str(resp)
+
+                    except ValueError as ve:
+                        # Handle ValueError for invalid supplier ID or other value-related issues
+                        error_message = f"ValueError: {ve}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
+                    except Exception as e:
+                        # Handle any unexpected errors
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
                 elif second_menu=="addsupplier":
-                    supplier_details = msg
-                    name,contactPerson,email,phone,address = supplier_details.split(",")
-                    reply = add_supplier(name,contactPerson,email,phone,address, user_phone)
-                    print(reply)
-                    user_session['second_menu'] = None  # Reset the second menu
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    return str(resp)
+                    try:
+                        # Split the input message to get supplier details
+                        supplier_details = msg.split(",")
+
+                        if len(supplier_details) != 5:
+                            raise ValueError("Incorrect number of supplier details provided. Expected 5 values.")
+
+                        name, contactPerson, email, phone, address = supplier_details
+
+                        # Call the API or method to add the supplier
+                        reply = add_supplier(name, contactPerson, email, phone, address, user_phone)
+                        print(reply)
+
+                        # Reset the second menu and update the session
+                        user_session['second_menu'] = None
+                        session[user_phone] = user_session
+
+                        # Send the response message
+                        resp.message(reply)
+                        return str(resp)
+
+                    except ValueError as ve:
+                        # Handle ValueError for incorrect input format or other value-related issues
+                        error_message = f"ValueError: {ve}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
+                    except Exception as e:
+                        # Handle any unexpected errors
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
                 elif second_menu=="editsupplier":
-                    supplier_Name,item_name,new_value=msg.split(",")
-                    supplier_Id = get_supplier_id_by_name(supplier_Name, user_phone)
-                    if not supplier_Id:
-                        # Handle cases where supplier is not found or error occurred
-                        reply = "Supplier does not exist"
-                    else:
-                        # Parse the details received in the result
-                        reply =edit_supplier(supplier_Id,item_name,new_value, user_phone)
-           
-                    user_session['second_menu'] = None  # Reset the second menu
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    return str(resp)
+                    try:
+                        # Split the input message to get supplier details
+                        supplier_Name, item_name, new_value = msg.split(",")
+
+                        # Validate the item_name
+                        valid_item_names = ["name", "contactPerson", "email", "phone", "address"]
+                        if item_name not in valid_item_names:
+                            raise ValueError(f"Invalid item_name: {item_name}. Must be one of {', '.join(valid_item_names)}.")
+
+                        # Retrieve the supplier ID based on the supplier name
+                        supplier_Id = get_supplier_id_by_name(supplier_Name, user_phone)
+
+                        if not supplier_Id:
+                            # Handle cases where the supplier is not found
+                            reply = "Supplier does not exist"
+                        else:
+                            # Call the API or method to edit the supplier details
+                            reply = edit_supplier(supplier_Id, item_name, new_value, user_phone)
+
+                        # Reset the second menu and update the session
+                        user_session['second_menu'] = None
+                        session[user_phone] = user_session
+
+                        # Send the response message
+                        resp.message(reply)
+                        return str(resp)
+
+                    except ValueError as ve:
+                        # Handle ValueError for invalid item_name or other value-related issues
+                        error_message = f"ValueError: {ve}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
+                    except Exception as e:
+                        # Handle any unexpected errors
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
                     
         elif first_menu == 'employeemenu':
             if not second_menu:
@@ -316,9 +567,8 @@ def sms_reply():
                     # Get employees data
                     employees = get_employees(user_phone)
                     if employees:
-                        # Format product data as a string
-                        employee_list = "\n\n".join([f"Name: {employee['name']}\nEmail: {employee['email']}\nPhone: {employee['phone']}" for employee in employees])
-                        resp.message(f"Employees are:\n{employee_list}")
+                       employee_list = "\n\n".join( [f"Name: {employee.get('name', 'N/A')}\nEmail: {employee.get('email', 'N/A')}\nPhone: {employee.get('phone', 'N/A')}" for employee in employees])
+                       resp.message(f"Employees are:\n{employee_list}")
                     else:
                         resp.message("Failed to fetch employees list")
                     
@@ -341,36 +591,78 @@ def sms_reply():
                 return str(resp)    
             else:
                 if second_menu == 'removeemployee':
-                    employee_name = msg  # Assuming the message contains the name of the employee to remove
-                    employee_id = get_employee_id_by_name(employee_name,user_phone)
-                    if not employee_id:
-                        # Handle cases where employee is not found or error occurred
-                        reply = "Employee does not exist"
-                    else:
-                        # Call the API or method to remove the employee using employee_id
-                        result = delete_employee(employee_id,user_phone)
-                        if result:
-                            reply = f"Employee {employee_name} removed successfully"
+                    try:
+                        # Assume the message contains the name of the employee to remove
+                        employee_name = msg
+
+                        # Retrieve the employee ID based on the name
+                        employee_id = get_employee_id_by_name(employee_name, user_phone)
+
+                        if not employee_id:
+                            # Handle cases where the employee is not found
+                            reply = "Employee does not exist"
                         else:
-                            reply = f"Operation failed: {result}"
-                    user_session['second_menu'] = None  # Reset the second menu
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    return str(resp)  
+                            # Attempt to delete the employee using the retrieved employee_id
+                            result = delete_employee(employee_id, user_phone)
+
+                            if result:
+                                reply = f"Employee {employee_name} removed successfully"
+                            else:
+                                reply = f"Operation failed: {result}"
+
+                        # Reset the second menu and update the session
+                        user_session['second_menu'] = None
+                        session[user_phone] = user_session
+
+                        # Send the response message
+                        resp.message(reply)
+                        return str(resp)
+
+                    except Exception as e:
+                        # Handle any unexpected errors
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
                 elif second_menu == 'viewemployee':
-                    employee_name = msg  # Assuming the message contains the name of the employee to remove
-                    employee_details = get_employee_details_by_name(employee_name,user_phone)
-                    if not employee_details:
-                        # Handle cases where Employee is not found or error occurred
-                        reply = "Employee does not exist"
-                    else:
-                        reply = f"Employee Details:\nName: {employee_details['name']}\nAddress: {employee_details['address']}\nEmail: {employee_details['email']}\nAddress: {employee_details['address']}\nPosition: {employee_details['position']}\nSalary: {employee_details['salary']}\nWorking Hours: {employee_details['workingHours']}\nStatus: {employee_details['status']}\nHiredate:{employee_details['hireDate']}"
-           
-                    user_session['second_menu'] = None  # Reset the second menu
-                    
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    return str(resp)
+                        try:
+                            # Assume the message contains the name of the employee to retrieve
+                            employee_name = msg
+
+                            # Retrieve the employee details based on the name
+                            employee_details = get_employee_details_by_name(employee_name, user_phone)
+
+                            if not employee_details:
+                                # Handle cases where employee is not found
+                                reply = "Employee does not exist"
+                            else:
+                                # Format the employee details for the response
+                                reply = (f"Employee Details:\n"
+                                        f"Name: {employee_details.get('name', 'N/A')}\n"
+                                        f"Address: {employee_details.get('address', 'N/A')}\n"
+                                        f"Email: {employee_details.get('email', 'N/A')}\n"
+                                        f"Position: {employee_details.get('position', 'N/A')}\n"
+                                        f"Salary: {employee_details.get('salary', 'N/A')}\n"
+                                        f"Working Hours: {employee_details.get('workingHours', 'N/A')}\n"
+                                        f"Status: {employee_details.get('status', 'N/A')}\n"
+                                        f"Hire Date: {employee_details.get('hireDate', 'N/A')}")
+
+                            # Reset the second menu and update the session
+                            user_session['second_menu'] = None
+                            session[user_phone] = user_session
+
+                            # Send the response message
+                            resp.message(reply)
+                            return str(resp)
+
+                        except Exception as e:
+                            # Handle any unexpected errors
+                            error_message = f"An error occurred: {e}"
+                            print(error_message)
+                            resp.message(error_message)
+                            return str(resp)
+
                 elif second_menu=="addemployee":
                     try:
                         # Split employee details from the input message
@@ -378,6 +670,10 @@ def sms_reply():
 
                         if len(employee_details) != 9:
                             raise ValueError("Incorrect number of employee details provided.")
+                        
+                        valid_statuses = ["Active", "Terminated", "On leave"]
+                        if status not in valid_statuses:
+                            raise ValueError(f"Invalid status value: {status}. Must be one of {', '.join(valid_statuses)}.")
 
                         name, email, phone, address, position, hireDate, salary, workingHours, status = employee_details
 
@@ -394,7 +690,7 @@ def sms_reply():
 
                     except ValueError as ve:
                         # Handle ValueError and send the message to the client
-                        error_message = f"ValueError: {ve}"
+                        error_message = f"Error: {ve}"
                         print(error_message)
                         resp.message(error_message)
                         return str(resp)
@@ -407,28 +703,47 @@ def sms_reply():
                         return str(resp)
 
                 elif second_menu=="editemployee":
-                    employee_Name,item_name,new_value=msg.split(",")
-                    employee_Id = get_employee_id_by_name(employee_Name, user_phone)
-                    if not employee_Id:
-                        # Handle cases where employee is not found or error occurred
-                        reply = "Employee does not exist"
-                    else:
-                        # Call the API or method to remove the employee using employee_id
-                        reply =edit_employee(employee_Id,item_name,new_value, user_phone)
-           
-                    user_session['second_menu'] = None  # Reset the second menu
-                   
-                    session[user_phone] = user_session
-                    resp.message(reply)
-                    return str(resp)
-                    
-                
-        
-        
+                    try:
+                        # Split the input message to get employee details
+                        employee_Name, item_name, new_value = msg.split(",")
 
-       
-    
-    
+                        # Validate the item_name
+                        valid_item_names = ["name", "email", "phone", "address", "position", "hireDate", "salary", "workingHours", "status"]
+                        if item_name not in valid_item_names:
+                            raise ValueError(f"Invalid item_name: {item_name}. Must be one of {', '.join(valid_item_names)}.")
+
+                        # Retrieve the employee ID based on the name
+                        employee_Id = get_employee_id_by_name(employee_Name, user_phone)
+
+                        if not employee_Id:
+                            # Handle cases where employee is not found
+                            reply = "Employee does not exist"
+                        else:
+                            # Call the API or method to edit the employee details
+                            reply = edit_employee(employee_Id, item_name, new_value, user_phone)
+
+                        # Reset the second menu and update the session
+                        user_session['second_menu'] = None
+                        session[user_phone] = user_session
+
+                        # Send the response message
+                        resp.message(reply)
+                        return str(resp)
+
+                    except ValueError as ve:
+                        # Handle ValueError, including invalid item_name or any other value-related issues
+                        error_message = f"ValueError: {ve}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
+                    except Exception as e:
+                        # Handle any other unexpected errors
+                        error_message = f"An error occurred: {e}"
+                        print(error_message)
+                        resp.message(error_message)
+                        return str(resp)
+
     #if the above conditions are not working
     print("Before sending the response: ",reply)
     session[user_phone] = user_session
