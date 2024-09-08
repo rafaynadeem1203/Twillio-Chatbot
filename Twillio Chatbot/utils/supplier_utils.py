@@ -152,3 +152,23 @@ def edit_supplier(id, item_name, new_value, userPhone):
     except Exception as e:
         print("Error editing supplier:", str(e))
         return "Error occurred while editing the supplier"
+def get_supplier_name_by_id(supplier_id, userPhone): 
+    try:
+        connect()
+        client = connect()
+        transformedPhone = convert_phone_number(userPhone)
+        db = client.get_database(transformedPhone)
+        user_collection = db.suppliers  # Assuming a 'suppliers' collection
+        
+        result = user_collection.find_one({"_id": supplier_id})
+        client.close()
+
+        if result:
+            print("Supplier Details are: ", result)
+            return result
+        else:
+            print("Supplier not Found")
+            return "Supplier not found"
+    except Exception as e:
+        print("Error fetching Supplier details:", str(e))
+        return "Internal Server Error", 500
