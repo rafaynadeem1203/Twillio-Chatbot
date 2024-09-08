@@ -188,22 +188,9 @@ def sms_reply():
                         # Handle cases where product is not found or error occurred
                         reply = "Product does not exist"
                     else:
-                        # Call the API or method to remove the product using product_id
-                        result = get_product_details_by_name(product_Name, user_phone)
-                        if result == "Product not found":
-                            reply = "Product not found"
-                        elif result=="Product details not found":
-                            reply = "Product details not found"
-                        elif result=="Product ID is required":
-                            reply="Product ID is required"
-                        else:
-                             # Parse the details received in the result
-                            product_details = result
-                            product_details[item_name]=new_value
-                            print("product details from edit product are",product_details)
-                            edit_response = edit_product(product_details['_id'],item_name,new_value, user_phone)
-                             # Format the product details into a reply message
-                            reply = edit_response
+                        edit_response = edit_product(product_Id,item_name,new_value, user_phone)
+                        # Format the product details into a reply message
+                        reply = edit_response
            
                     user_session['second_menu'] = None  # Reset the second menu
                     
